@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="3;url={{ redirect }}" />
+    <title>{{ message }}</title>
+</head>
+<style>
+    .fullscreenDiv {
+    background-color: white;
+    width: 100%;
+    height: auto;
+    bottom: 0px;
+    top: 0px;
+    left: 0;
+    position: absolute;
+    }
+    .center {
+        position: absolute;
+        min-width: 310px;
+        height: 50px;
+        top: 30%;
+        left: 42%;
+    }
+
+</style>
+<body>
+<div class='fullscreenDiv'>
+    <div class="center">
+        {% if status is sameas True %}<img src="{{ url_for('static', filename='images/success.jpg') }}" alt="status" width="256px" height="256px"/>
+        {% else %}<img src="{{ url_for('static', filename='images/fail.png') }}" alt="status" width="256px" height="256px"/>
+        {% endif %}
+        <br>
+        <br>
+        <h1 style="position: relative;{% if status is sameas False %}right: 15%;{% endif %}">{{msg}}</h1><br>
+        This page will redirect in 3 seconds.
+    </div>
+
+</div>
+</body>
+</html>
