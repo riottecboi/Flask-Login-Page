@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='fonts/icomoon/style.css') }}">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/owl.carousel.min.css') }}">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/bootstrap.min.css') }}">
+    
+    <!-- Style -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/style.css') }}">
+
+    <!-- Boostrap Javascript-->
+    <script src="{{ url_for('static',filename='jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='popper.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='main.js') }}"></script>
+
+    <title>Login</title>
+  </head>
+  <body>
+  
+  <div class="container" style="margin-top: 10%">
+    <div class="row align-items-center justify-content-center">
+      <div class="col-md-7">
+        <div class="mb-4">
+          <h3>Sign In</h3>
+        </div>
+        <form action="#" method="post">
+          <div class="form-group first">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username">
+
+          </div>
+          <div class="form-group last mb-3">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password">
+
+          </div>
+
+          <div class="d-flex mb-5 align-items-center">
+            <span id="signup"><a href="#">Sign Up</a></span>
+            <span class="ml-auto"><a href="#" class="forgot-pass">Forgot Password</a></span>
+          </div>
+
+          <input type="submit" value="Log In" class="btn btn-block btn-primary">
+
+          <span class="d-block text-center my-4 text-muted">&mdash; or &mdash;</span>
+
+          <div class="social-login">
+            <a href="#" class="google btn d-flex justify-content-center align-items-center">
+              <span class="icon-google mr-3"></span> Login with Google
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  </body>
+</html>
