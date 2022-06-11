@@ -128,7 +128,7 @@ def forgotpassword():
             verify_code = checkEmail.veifiedCode()
             session.add(checkEmail)
             session.commit()
-            emailMsg = 'Your verification code is {}'.format(str(verify_code))
+            emailMsg = 'Your verification code is: {}'.format(str(verify_code))
             mimeMessage = MIMEMultipart()
             mimeMessage['to'] = 'rintran1307@gmail.com'
             mimeMessage['subject'] = 'Verification Code'
@@ -143,6 +143,32 @@ def forgotpassword():
         print('Exception occurred: {}'.format(str(e)))
         session.close()
         return render_template('redirect.html', redirect=url_for('signup'), msg='Exception occurred', status=False)
+
+@app.route("/passchange", methods=['GET', 'POST'])
+def passchange():
+    if request.method == 'GET':
+        return render_template('verify.html')
+    session = sessionFactory()
+    verified_code = request.form.get('verified')
+    new_pwd = request.form.get('new_pwd')
+    confirm_pwd = request.form.get('confirm_pwd')
+    if new_pwd == confirm_pwd:
+        checkVerificationCode = session.query(User).filter(User.verified == verified_code).first()
+        if checkVerificationCode is not None:
+            checkVerificationCode.passwordMode(new_pwd)
+            session.add(checkVerificationCode)
+            session.commit()
+            session.close()
+            return render_template('redirect.html', redirect=url_for('login'), msg='Change successful password',
+                                   status=True)
+        else:
+            session.close()
+            return render_template('redirect.html', redirect=url_for('passchange'), msg='Verfied Code not right',
+                                   status=False)
+    else:
+        session.close()
+        return render_template('redirect.html', redirect=url_for('passchange'), msg='Password not matched',
+                               status=False)
 
 @app.route("/googlelogin")
 def googlelogin():

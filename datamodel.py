@@ -27,27 +27,6 @@ class User(Base):
         self.verified = "".join(passwordCharacters)
         return f"{self.verified}"
 
-    def sendEmail(self, sender, sender_password, receiver):
-        port = 587  # For SSL
-        smtp_server = "smtp.gmail.com"
-        sender_email = sender  # Enter your address
-        receiver_email = receiver  # Enter receiver address
-        password = sender_password
-        message = """\
-        Subject: Hi there
-
-        This message is sent from Python."""
-
-        try:
-            context = ssl.create_default_context()
-            with smtplib.SMTP(smtp_server, port) as server:
-                server.ehlo()  # Can be omitted
-                server.starttls(context=context)
-                server.ehlo()  # Can be omitted
-                server.login(sender_email, password)
-                server.sendmail(sender_email, receiver_email, message)
-        except Exception as e:
-            print(str(e))
 
     def generate_salt(self):
         self.password_salt = hexlify(urandom(32)).decode('utf-8').upper()
