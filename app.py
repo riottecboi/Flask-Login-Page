@@ -1,9 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for
+import flask
+from flask import Flask, render_template, request, redirect, url_for, make_response
 from flask_wtf.csrf import CSRFProtect
 from flask_env import MetaFlaskEnv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datamodel import Base, User
+from google.oauth2 import id_token
+from google_auth_oauthlib.flow import Flow
+from pip._vendor import cachecontrol
+import google.auth.transport.requests
+import requests
+import os
+import pathlib
+import json
 
 app = Flask(__name__)
 
@@ -12,13 +21,23 @@ class Configuration(metaclass=MetaFlaskEnv):
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://localhost:3306/testlogin?user=root&password=root'
     POOL_SIZE = 5
     POOL_RECYCLE = 60
+    SENDER = "tranvinhliem1307@gmail.com"
+    SENDER_PASSWORD = "a58evwck"
+    GOOGLE_CLIENT_ID = '87230437389-bqr548s8kk74bd8atldtopc8vsiq1i61.apps.googleusercontent.com'
+    GOOGLE_REDIRECT_URI = 'http://127.0.0.1:5000/gCallback'
 
 try:
     app.config.from_pyfile('settings.cfg')
 except FileNotFoundError:
     app.config.from_object(Configuration)
-
+config = {}
+with open('credentials.json', encoding='utf-8') as json_data_file:
+    kwargs = json.load(json_data_file)
+    for key in kwargs:
+        config[key] = kwargs[key]
 csrf = CSRFProtect(app)
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret.json")
 
 #Established database connection
 mysql_string = app.config['SQLALCHEMY_DATABASE_URI']
@@ -43,7 +62,8 @@ def login():
         getUser = session.query(User).filter(User.username == username).one()
     except Exception as e:
         print('Exception occurred: {}'.format(str(e)))
-        return render_template('redirect.html', redirect=url_for('login'), msg='Not found user', status=False)
+        session.close()
+        return render_template('redirect.html', redirect=url_for('login'), msg='User not found', status=False)
     if getUser.check_password(password):
         session.close()
         return redirect('https://www.viact.ai/', code=302)
@@ -64,8 +84,10 @@ def signup():
             checkUsername = session.query(User).filter(User.username == username).first()
             checkEmail = session.query(User).filter(User.email == email).first()
             if checkEmail is not None:
+                session.close()
                 return render_template('redirect.html', redirect=url_for('signup'), msg='Email already registered', status=False)
             if checkUsername is not None:
+                session.close()
                 return render_template('redirect.html', redirect=url_for('signup'), msg='Username already registered', status=False)
             addUser = User(username=username, email=email)
             addUser.passwordMode(password)
@@ -78,6 +100,75 @@ def signup():
             return render_template('redirect.html', redirect=url_for('signup'), msg='Exception occurred', status=False)
     session.close()
     return render_template('redirect.html', redirect=url_for('login'), msg='Password not match', status=False)
+
+
+@app.route('/forgotpassword', methods=['GET','POST'])
+def forgotpassword():
+    if request.method == 'GET':
+        return render_template('forgot.html')
+    session = sessionFactory()
+    email = request.form.get('email')
+    try:
+        checkEmail = session.query(User).filter(User.email==email).first()
+        if checkEmail is not None:
+            verify_code = checkEmail.veifiedCode()
+            session.add(checkEmail)
+            session.commit()
+            checkEmail.sendEmail(app.config['SENDER'], app.config['SENDER_PASSWORD'], email)
+        else:
+            return render_template('redirect.html', redirect=url_for('signup'), msg='Email not found',
+                                   status=False)
+    except Exception as e:
+        print('Exception occurred: {}'.format(str(e)))
+        session.close()
+        return render_template('redirect.html', redirect=url_for('signup'), msg='Exception occurred', status=False)
+
+@app.route("/googlelogin")
+def googlelogin():
+    try:
+        flow = Flow.from_client_config(
+            client_config=config,
+            scopes=["https://www.googleapis.com/auth/userinfo.profile",
+                    "https://www.googleapis.com/auth/userinfo.email", "openid"],
+            redirect_uri=app.config['GOOGLE_REDIRECT_URI']
+        )
+        authorization_url, state = flow.authorization_url()
+        flask.session['state'] = state
+        resp = make_response(redirect(authorization_url))
+        return resp
+    except Exception as e:
+        return render_template('redirect.html', msg='Exception occurred: {}'.format(str(e)), redirect="/" , status=False)
+
+@app.route('/gCallback')
+def callback():
+    try:
+        session = sessionFactory()
+        state = flask.session['state']
+        flow = Flow.from_client_config(
+            client_config=config,
+            scopes=["https://www.googleapis.com/auth/userinfo.profile",
+                    "https://www.googleapis.com/auth/userinfo.email", "openid"],
+            redirect_uri=app.config['GOOGLE_REDIRECT_URI'],
+            state=state
+        )
+        flow.fetch_token(authorization_response=request.url)
+        credentials = flow.credentials
+        request_session = requests.session()
+        cached_session = cachecontrol.CacheControl(request_session)
+        token_request = google.auth.transport.requests.Request(session=cached_session)
+        id_info = id_token.verify_oauth2_token(
+            id_token=credentials._id_token,
+            request=token_request,
+            audience=app.config['GOOGLE_CLIENT_ID']
+        )
+        addUser = User(username=id_info.get("name"), email=id_info.get("email"))
+        session.add(addUser)
+        session.commit()
+        session.close()
+        return redirect("https://www.google.com.vn/")
+    except Exception as e:
+        return render_template('redirect.html', msg='Exception occurred: {}'.format(str(e)), redirect="/", status=False)
+
 
 
 @app.route('/testTemplate', methods=['GET'])
