@@ -21,13 +21,11 @@ app = Flask(__name__)
 
 class Configuration(metaclass=MetaFlaskEnv):
     SECRET_KEY = "supersecretkey"
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://localhost:3306/testlogin?user=root&password=root'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://localhost:3306/testlogin?user=flask&password=password'
     POOL_SIZE = 5
     POOL_RECYCLE = 60
-    SENDER = "tranvinhliem1307@gmail.com"
-    SENDER_PASSWORD = "a58evwck"
     GOOGLE_CLIENT_ID = '87230437389-bqr548s8kk74bd8atldtopc8vsiq1i61.apps.googleusercontent.com'
-    GOOGLE_REDIRECT_URI = 'http://127.0.0.1:5000/gCallback'
+    GOOGLE_REDIRECT_URI = 'http://login-test.cloudbits.site/gCallback'
     EMAIL_HOST = '127.0.0.1'
     EMAIL_PORT = 5500
 
@@ -130,12 +128,12 @@ def forgotpassword():
             session.commit()
             emailMsg = 'Your verification code is: {}'.format(str(verify_code))
             mimeMessage = MIMEMultipart()
-            mimeMessage['to'] = 'rintran1307@gmail.com'
+            mimeMessage['to'] = email
             mimeMessage['subject'] = 'Verification Code'
             mimeMessage.attach(MIMEText(emailMsg, 'plain'))
             raw_string = base64.urlsafe_b64encode(mimeMessage.as_bytes()).decode()
             message = service.users().messages().send(userId='me', body={'raw': raw_string}).execute()
-            return redirect('/login', code=302)
+            return redirect('/passchange', code=302)
         else:
             return render_template('redirect.html', redirect=url_for('signup'), msg='Email not found',
                                    status=False)
@@ -208,11 +206,7 @@ def callback():
             request=token_request,
             audience=app.config['GOOGLE_CLIENT_ID']
         )
-        addUser = User(username=id_info.get("name"), email=id_info.get("email"))
-        session.add(addUser)
-        session.commit()
-        session.close()
-        return redirect("https://www.google.com.vn/")
+        return redirect('https://www.viact.ai/')
     except Exception as e:
         return render_template('redirect.html', msg='Exception occurred: {}'.format(str(e)), redirect="/", status=False)
 
