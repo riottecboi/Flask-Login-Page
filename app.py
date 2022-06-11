@@ -78,7 +78,7 @@ def login():
         return render_template('redirect.html', redirect=url_for('login'), msg='User not found', status=False)
     if getUser.check_password(password):
         session.close()
-        return redirect('https://www.viact.ai/', code=302)
+        return redirect('https://www.google.com.vn/', code=302)
     session.close()
     return render_template('redirect.html', redirect=url_for('login'), msg='Wrong username or password', status=False)
 
@@ -206,7 +206,7 @@ def callback():
             request=token_request,
             audience=app.config['GOOGLE_CLIENT_ID']
         )
-        return redirect('https://www.viact.ai/')
+        return redirect('https://www.google.com.vn/')
     except Exception as e:
         return render_template('redirect.html', msg='Exception occurred: {}'.format(str(e)), redirect="/", status=False)
 
