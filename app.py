@@ -9,9 +9,12 @@ from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
+from Google import Create_Service
+import base64
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import requests
 import os
-import pathlib
 import json
 
 app = Flask(__name__)
@@ -25,6 +28,8 @@ class Configuration(metaclass=MetaFlaskEnv):
     SENDER_PASSWORD = "a58evwck"
     GOOGLE_CLIENT_ID = '87230437389-bqr548s8kk74bd8atldtopc8vsiq1i61.apps.googleusercontent.com'
     GOOGLE_REDIRECT_URI = 'http://127.0.0.1:5000/gCallback'
+    EMAIL_HOST = '127.0.0.1'
+    EMAIL_PORT = 5500
 
 try:
     app.config.from_pyfile('settings.cfg')
@@ -36,8 +41,17 @@ with open('credentials.json', encoding='utf-8') as json_data_file:
     for key in kwargs:
         config[key] = kwargs[key]
 csrf = CSRFProtect(app)
+#this need to set up as ENV variable to run at local
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
-client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "client_secret.json")
+####################################################
+
+#Setting for sending email by Gmail API
+CLIENT_SECRET_FILE = 'credentials.json'
+API_NAME = 'gmail'
+API_VERSION = 'v1'
+SCOPES = ['https://www.googleapis.com/auth/gmail.send']
+
+service = Create_Service(app.config['EMAIL_HOST'], app.config['EMAIL_PORT'], CLIENT_SECRET_FILE, API_NAME, API_VERSION, SCOPES)
 
 #Established database connection
 mysql_string = app.config['SQLALCHEMY_DATABASE_URI']
@@ -114,7 +128,14 @@ def forgotpassword():
             verify_code = checkEmail.veifiedCode()
             session.add(checkEmail)
             session.commit()
-            checkEmail.sendEmail(app.config['SENDER'], app.config['SENDER_PASSWORD'], email)
+            emailMsg = 'Your verification code is {}'.format(str(verify_code))
+            mimeMessage = MIMEMultipart()
+            mimeMessage['to'] = 'rintran1307@gmail.com'
+            mimeMessage['subject'] = 'Verification Code'
+            mimeMessage.attach(MIMEText(emailMsg, 'plain'))
+            raw_string = base64.urlsafe_b64encode(mimeMessage.as_bytes()).decode()
+            message = service.users().messages().send(userId='me', body={'raw': raw_string}).execute()
+            return redirect('/login', code=302)
         else:
             return render_template('redirect.html', redirect=url_for('signup'), msg='Email not found',
                                    status=False)
