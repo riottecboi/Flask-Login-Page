@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='fonts/icomoon/style.css') }}">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/owl.carousel.min.css') }}">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/bootstrap.min.css') }}">
+
+    <!-- Style -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/style.css') }}">
+
+    <!-- Boostrap Javascript-->
+    <script src="{{ url_for('static',filename='jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='popper.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='main.js') }}"></script>
+    <title>Main</title>
+</head>
+<style>
+    table {
+      border-collapse: collapse;
+      border-spacing: 0;
+      width: 100%;
+      border: 1px solid #ddd;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px;
+    }
+
+    tr:nth-child(even){background-color: #f2f2f2}
+</style>
+<body>
+    <div class="container" style="margin-top: 10%">
+        <div class="row align-items-center justify-content-center">
+            <div class="col-md-7">
+                <div class="mb-4">
+                    <h3>Hello ! {{ email }}</h3>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <tr>
+                            <th>Git</th>
+                        </tr>
+                        {% for git in git %}
+                            <tr>
+                                <td><a href="{{git}}">{{git}}</a></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    <table>
+                        <tr>
+                            <th>Python's cheatsheats</th>
+                        </tr>
+                        {% for sheat in cheatsheats %}
+                            <tr>
+                                <td><a href="{{sheat}}">{{sheat}}</a></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    <table>
+                        <tr>
+                            <th>Python's examples</th>
+                        </tr>
+                        {% for example in examples %}
+                            <tr>
+                                <td><a href="{{example}}">{{example}}</a></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

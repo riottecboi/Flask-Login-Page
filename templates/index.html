@@ -34,25 +34,26 @@
         </div>
         <form action="/login" method="post">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <div class="form-group first">
-            <label for="username">Username</label>
-            <input type="text" class="form-control" id="username" name="username">
+<!--          <div class="form-group first">-->
+<!--            <label for="username">Username</label>-->
+<!--            <input type="text" class="form-control" id="username" name="username">-->
 
-          </div>
-          <div class="form-group last mb-3">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" name="password">
+<!--          </div>-->
+<!--          <div class="form-group last mb-3">-->
+<!--            <label for="password">Password</label>-->
+<!--            <input type="password" class="form-control" id="password" name="password">-->
 
-          </div>
+<!--          </div>-->
 
-          <div class="d-flex mb-5 align-items-center">
-            <span id="signup"><a href="/signup">Sign Up</a></span>
-            <span class="ml-auto"><a href="/forgotpassword" class="forgot-pass">Forgot Password</a></span>
-          </div>
+<!--          <div class="d-flex mb-5 align-items-center">-->
+<!--            <span id="signup"><a href="/signup">Sign Up</a></span>-->
+<!--            <span class="ml-auto"><a href="/forgotpassword" class="forgot-pass">Forgot Password</a></span>-->
+<!--          </div>-->
 
-          <input type="submit" value="Log In" class="btn btn-block btn-primary">
+<!--          <input type="submit" value="Log In" classcd
+="btn btn-block btn-primary">-->
 
-          <span class="d-block text-center my-4 text-muted">&mdash; or &mdash;</span>
+<!--          <span class="d-block text-center my-4 text-muted">&mdash; or &mdash;</span>-->
 
           <div class="social-login">
             <a href="{{ url_for('googlelogin') }}" class="google btn d-flex justify-content-center align-items-center">

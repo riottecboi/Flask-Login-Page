@@ -21,13 +21,14 @@ app = Flask(__name__)
 
 class Configuration(metaclass=MetaFlaskEnv):
     SECRET_KEY = "supersecretkey"
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://localhost:3306/testlogin?user=flask&password=password'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://localhost:3306/testlogin?user=root&password=root'
     POOL_SIZE = 5
     POOL_RECYCLE = 60
     GOOGLE_CLIENT_ID = '87230437389-bqr548s8kk74bd8atldtopc8vsiq1i61.apps.googleusercontent.com'
-    GOOGLE_REDIRECT_URI = 'http://login-test.cloudbits.site/gCallback'
+    GOOGLE_REDIRECT_URI = 'http://127.0.0.1:5000/gCallback'
     EMAIL_HOST = '127.0.0.1'
     EMAIL_PORT = 5500
+    ALLOWED_EMAILS = ['thonghuynhcrypto@gmail.com', 'tranvinhliem1307@gmail.com']
 
 try:
     app.config.from_pyfile('settings.cfg')
@@ -49,15 +50,15 @@ API_NAME = 'gmail'
 API_VERSION = 'v1'
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
-service = Create_Service(app.config['EMAIL_HOST'], app.config['EMAIL_PORT'], CLIENT_SECRET_FILE, API_NAME, API_VERSION, SCOPES)
+#service = Create_Service(app.config['EMAIL_HOST'], app.config['EMAIL_PORT'], CLIENT_SECRET_FILE, API_NAME, API_VERSION, SCOPES)
 
 #Established database connection
-mysql_string = app.config['SQLALCHEMY_DATABASE_URI']
-engine = create_engine(mysql_string, pool_pre_ping=True, echo=False,
-                       pool_size=app.config['POOL_SIZE'], pool_recycle=app.config['POOL_RECYCLE'])
-#Create database session
-sessionFactory = sessionmaker(bind=engine)
-Base.metadata.create_all(engine)
+# mysql_string = app.config['SQLALCHEMY_DATABASE_URI']
+# engine = create_engine(mysql_string, pool_pre_ping=True, echo=False,
+#                        pool_size=app.config['POOL_SIZE'], pool_recycle=app.config['POOL_RECYCLE'])
+# #Create database session
+# sessionFactory = sessionmaker(bind=engine)
+# Base.metadata.create_all(engine)
 
 @app.route('/', methods=['GET'])
 def index():
@@ -114,33 +115,33 @@ def signup():
     return render_template('redirect.html', redirect=url_for('login'), msg='Password not match', status=False)
 
 
-@app.route('/forgotpassword', methods=['GET','POST'])
-def forgotpassword():
-    if request.method == 'GET':
-        return render_template('forgot.html')
-    session = sessionFactory()
-    email = request.form.get('email')
-    try:
-        checkEmail = session.query(User).filter(User.email==email).first()
-        if checkEmail is not None:
-            verify_code = checkEmail.veifiedCode()
-            session.add(checkEmail)
-            session.commit()
-            emailMsg = 'Your verification code is: {}'.format(str(verify_code))
-            mimeMessage = MIMEMultipart()
-            mimeMessage['to'] = email
-            mimeMessage['subject'] = 'Verification Code'
-            mimeMessage.attach(MIMEText(emailMsg, 'plain'))
-            raw_string = base64.urlsafe_b64encode(mimeMessage.as_bytes()).decode()
-            message = service.users().messages().send(userId='me', body={'raw': raw_string}).execute()
-            return redirect('/passchange', code=302)
-        else:
-            return render_template('redirect.html', redirect=url_for('signup'), msg='Email not found',
-                                   status=False)
-    except Exception as e:
-        print('Exception occurred: {}'.format(str(e)))
-        session.close()
-        return render_template('redirect.html', redirect=url_for('signup'), msg='Exception occurred', status=False)
+# @app.route('/forgotpassword', methods=['GET','POST'])
+# def forgotpassword():
+#     if request.method == 'GET':
+#         return render_template('forgot.html')
+#     session = sessionFactory()
+#     email = request.form.get('email')
+#     try:
+#         checkEmail = session.query(User).filter(User.email==email).first()
+#         if checkEmail is not None:
+#             verify_code = checkEmail.veifiedCode()
+#             session.add(checkEmail)
+#             session.commit()
+#             emailMsg = 'Your verification code is: {}'.format(str(verify_code))
+#             mimeMessage = MIMEMultipart()
+#             mimeMessage['to'] = email
+#             mimeMessage['subject'] = 'Verification Code'
+#             mimeMessage.attach(MIMEText(emailMsg, 'plain'))
+#             raw_string = base64.urlsafe_b64encode(mimeMessage.as_bytes()).decode()
+#             message = service.users().messages().send(userId='me', body={'raw': raw_string}).execute()
+#             return redirect('/passchange', code=302)
+#         else:
+#             return render_template('redirect.html', redirect=url_for('signup'), msg='Email not found',
+#                                    status=False)
+#     except Exception as e:
+#         print('Exception occurred: {}'.format(str(e)))
+#         session.close()
+#         return render_template('redirect.html', redirect=url_for('signup'), msg='Exception occurred', status=False)
 
 @app.route("/passchange", methods=['GET', 'POST'])
 def passchange():
@@ -187,7 +188,7 @@ def googlelogin():
 @app.route('/gCallback')
 def callback():
     try:
-        session = sessionFactory()
+        # session = sessionFactory()
         state = flask.session['state']
         flow = Flow.from_client_config(
             client_config=config,
@@ -206,15 +207,40 @@ def callback():
             request=token_request,
             audience=app.config['GOOGLE_CLIENT_ID']
         )
+        if id_info['email'] in app.config['ALLOWED_EMAILS']:
+            return redirect(url_for('menu', email=id_info['email']), code=302)
         return redirect('https://www.google.com.vn/')
     except Exception as e:
         return render_template('redirect.html', msg='Exception occurred: {}'.format(str(e)), redirect="/", status=False)
 
 
+@app.route('/menu', methods=['GET'])
+def menu():
+    cheatsheats =[
+        'https://www.pythoncheatsheet.org/#Python-Basics',
+        'https://programmingwithmosh.com/wp-content/uploads/2019/02/Python-Cheat-Sheet.pdf',
+        'https://websitesetup.org/wp-content/uploads/2021/04/Python-cheat-sheet-April-2021.pdf'
+    ]
+    examples = [
+        'https://www.programiz.com/python-programming/examples',
+        'https://www.freecodecamp.org/news/python-code-examples-sample-script-coding-tutorial-for-beginners/'
+        'https://www.w3schools.com/python/python_examples.asp',
+        'https://www.geeksforgeeks.org/python-programming-examples/'
+    ]
 
-@app.route('/testTemplate', methods=['GET'])
-def test():
-    return render_template('index.html')
+    git = [
+        'https://viblo.asia/p/git-cheat-sheet-bo-suu-tap-cac-lenh-thuong-xuyen-duoc-su-dung-nhat-Az45bGXQKxY',
+        'https://education.github.com/git-cheat-sheet-education.pdf'
+    ]
+
+
+    if 'email' in request.args:
+        email = request.args.get('email')
+        if email not in app.config['ALLOWED_EMAILS']:
+            return redirect('https://www.google.com.vn/')
+        return render_template('main.html', cheatsheats=cheatsheats, examples=examples, git=git, email=email)
+
+    return redirect('/', code=302)
 
 
 if __name__ == '__main__':
