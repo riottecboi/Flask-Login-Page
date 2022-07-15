@@ -233,12 +233,22 @@ def menu():
         'https://education.github.com/git-cheat-sheet-education.pdf'
     ]
 
+    pip = [
+        'https://opensource.com/sites/default/files/gated-content/cheat_sheet_pip.pdf',
+        'https://viblo.asia/p/pip-pypi-package-manager-in-python-4dbZN4gL5YM',
+        'https://realpython.com/what-is-pip/'
+    ]
+
+    commands = [
+        'https://www.guru99.com/linux-commands-cheat-sheet.html',
+        'https://linuxconfig.org/linux-commands-cheat-sheet'
+    ]
 
     if 'email' in request.args:
         email = request.args.get('email')
         if email not in app.config['ALLOWED_EMAILS']:
             return redirect('https://www.google.com.vn/')
-        return render_template('main.html', cheatsheats=cheatsheats, examples=examples, git=git, email=email)
+        return render_template('main.html', cheatsheats=cheatsheats, examples=examples, git=git, pip=pip, commands=commands, email=email)
 
     return redirect('/', code=302)
 

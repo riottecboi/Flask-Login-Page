@@ -47,6 +47,16 @@
                 <div style="overflow-x:auto;">
                     <table>
                         <tr>
+                            <th>Linux basic commands</th>
+                        </tr>
+                        {% for command in commands %}
+                            <tr>
+                                <td><a href="{{command}}">{{command}}</a></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    <table>
+                        <tr>
                             <th>Git</th>
                         </tr>
                         {% for git in git %}
@@ -72,6 +82,16 @@
                         {% for example in examples %}
                             <tr>
                                 <td><a href="{{example}}">{{example}}</a></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    <table>
+                        <tr>
+                            <th>PIP package manager</th>
+                        </tr>
+                        {% for p in pip %}
+                            <tr>
+                                <td><a href="{{p}}">{{p}}</a></td>
                             </tr>
                         {% endfor %}
                     </table>
